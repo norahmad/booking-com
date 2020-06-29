@@ -1,5 +1,5 @@
 <?php
-
+error_reporting(0);
 use Twlve\Bookingcom\Booking;
 
 require 'vendor/autoload.php';
@@ -10,48 +10,55 @@ $hotels  = ['3326463', '4984319'];
 echo "\n[*] Register";
 echo "\n------------------\n";
 
-echo "[+] Email : ";
-$email = trim(fgets(STDIN));
+$list = file_get_contents("list.txt");
+$exn = explode("|", $list);
+foreach ($exn as $exn) {
+    echo "[+] Email : $exn";
+    // $email = trim(fgets(STDIN));
+    $email = $exn;
 
-echo "[+] Password : ";
-$password = trim(fgets(STDIN));
+    echo "[+] Password : Yaelahmad123";
+    $password = "Yaelahmad123";
 
-$register = $booking->register($email, $password);
+    $register = $booking->register($email, $password);
 
-if (!$register->success) {
-    checkConnection($register);
-    echo "\n[!] ERROR : " . $register->error_message . "\n";
-    die();
-}
-
-echo "\n[*] Register Success | {$email} : {$password}\n";
-
-echo "\n[*] Claim Reward";
-
-$booking->setAuthToken($register->data->auth_token);
-$createWishList = $booking->createWishList();
-
-if (!$createWishList->success) {
-    checkConnection($createWishList);
-    echo "\n\n[!] ERROR : " . $createWishList->error_message . "\n";
-    die();
-}
-
-foreach ($hotels as $hotel) {
-    $saveWishList = $booking->saveWishList($createWishList->data->id, $hotel);
-    if (!$saveWishList->success) {
-        checkConnection($saveWishList);
-        echo "\n\n[!] ERROR : " . $saveWishList->error_message . "\n";
-        die();
+    if (!$register->success) {
+        checkConnection($register);
+        echo "\n[!] ERROR : " . $register->error_message . "\n";
+        // die();
     }
 
-    if ($saveWishList->data->gta_add_three_items_campaign_status->status == 'reward_given_wallet') {
-        echo "\n\n[*] " . $saveWishList->data->gta_add_three_items_campaign_status->modal_body_text . "\n";
-        echo "[*] " . $saveWishList->data->gta_add_three_items_campaign_status->modal_header_text . "\n";
+    echo "\n[*] Register Success | {$email} : {$password}\n";
 
-        echo "\n[*] Logout\n";
-        $logout = $booking->logout();
-        die();
+    echo "\n[*] Claim Reward\n";
+
+    $booking->setAuthToken($register->data->auth_token);
+    $createWishList = $booking->createWishList();
+
+    if (!$createWishList->success) {
+        checkConnection($createWishList);
+        echo "\n\n[!] ERROR : " . $createWishList->error_message . "\n";
+        // $logout = $booking->logout();
+        // die();
+    }
+
+    foreach ($hotels as $hotel) {
+        $saveWishList = $booking->saveWishList($createWishList->data->id, $hotel);
+        if (!$saveWishList->success) {
+            checkConnection($saveWishList);
+            echo "\n\n[!] ERROR : " . $saveWishList->error_message . "\n";
+            // $logout = $booking->logout();
+            // die();
+        }
+
+        if ($saveWishList->data->gta_add_three_items_campaign_status->status == 'reward_given_wallet') {
+            echo "\n\n[*] " . $saveWishList->data->gta_add_three_items_campaign_status->modal_body_text . "\n";
+            echo "[*] " . $saveWishList->data->gta_add_three_items_campaign_status->modal_header_text . "\n";
+
+            echo "\n[*] Logout\n";
+            $logout = $booking->logout();
+            // die();
+        }
     }
 }
 
@@ -73,6 +80,6 @@ function checkConnection($data)
         echo " ____) | |  | | |__| |  | |  | |__| | |__| | \  /\  /  | |\  |_|_|_|\n";
         echo "|_____/|_|  |_|\____/   |_|  |_____/ \____/   \/  \/   |_| \_(_|_|_)\n";
         sleep(2);
-        die();
+        // die();
     }
 }
